@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Audio Analyser</title>
+        <style>
+            body {
+                padding-top: 70px;
+            }
+            div#player {
+                width: 300px;
+                height: 60px;
+                background: #000000;
+                padding: 2px;
+                margin: 40px auto;
+            }
+            
+            div#player>div>audio {
+                width: 300px;
+                background: #000000;
+                float: left;
+            }
+            
+            div#player>canvas {
+                width: 300px;
+                height: 30px;
+                background: #000000;
+                float: left;
+            }
+        </style>
+        <script>
+            let audio = new Audio();
+            // audio.crossOrigin = 'anonymous';
+            // audio.src = 'The_Stranglers_-_Golden_Brown.mp3';
+            audio.src = 'A_Victory_of_Love.mp3';
+            audio.controls = true;
+            audio.loop = true;
+            audio.autoplay = false;
+            // audio.play();
+
+            let canvas, ctx, source, context, analyser, fbc, bars, barX, barWidth, barHeight;
+            window.addEventListener('load', initializePlayer, false);
+
+            function initializePlayer() {
+                document.getElementById('audio_box').appendChild(audio);
+                context = new AudioContext();
+                analyser = context.createAnalyser();
+                canvas = document.getElementById('analyser_render');
+                ctx = canvas.getContext('2d');
+                source = context.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(context.destination);
+                frameLooper();
+            }
+
+            function frameLooper() {
+                window.requestAnimationFrame(frameLooper);
+                fbc = new Uint8Array(analyser.frequencyBinCount);
+                analyser.getByteFrequencyData(fbc);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#4285F4';
+                bars = 100;
+                for (let i = 0; i < bars; i++) {
+                    barX = i * 3;
+                    barWidth = 2;
+                    barHeight = -(fbc[i] / 2);
+                    ctx.fillRect(barX, canvas.height, barWidth, barHeight);
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <h4 style="text-align: center; font-family: Arial, Helvetica, sans-serif">Audio Analyser</h4>
+        <div id="player">
+            <div id="audio_box"></div>
+            <canvas id="analyser_render"></canvas>
+        </div>
+
+    </body>
+</html>
